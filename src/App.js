@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import Order from './Order/order'
+import Order from './order/order'
 
 class App extends Component {
   state ={
@@ -9,45 +9,52 @@ class App extends Component {
       {food:'Burger',quantity:1 , size:'Large', price: 12}
     ],
     bill:0,
-    toggleView:false
+    toggleView:true
   }
 
   calculateTotalClickHandler =()=>{
       let total:number=0;
+      console.log(this.state.toggleView)
       this.state.order.forEach(function(obj){
         total = total + (obj.price* obj.quantity);
       });
       this.setState({bill:total});
       const toggleFlag = this.state.toggleView;
       this.setState({toggleView:!toggleFlag});
-      console.log(this.state.toggleView)
+
   }
 
-  orderChangedHandler =(event) =>{
-  this.setState( { order:[
-      {food:'Chips',quantity:event.target.value , size:'small',price:3},
-      {food:'Burger',quantity:1 , size:'Large', price: 12}
-    ]});
+  orderChangedHandler =(index,event) =>{
+      this.order[index].quantity = event.target.value;
+      const orders = this.order;
+      this.setState( { order:orders});
   }
 
   render() {
     //return React.createElement('div', {className:'App'}, React.createElement('h1', null, "This is Burger App."));
+      let burger = null;
+      if (this.state.toggleView){
+          burger=  ( <div>
+              {this.state.order.map((dish, index) =>{
+                      return <Order
+                          changed={this.orderChangedHandler(index)}
+                          food={dish.food}
+                          quantity={dish.quantity}
+                          size={dish.size}>
+                      </Order>
+
+                  })}
+          </div>);
+      }else{
+          burger=(<div>The cost is {this.state.bill} Aud.</div>);
+      }
     return (
       <div className="App">
         <p className="App-intro">
         This is burger app
         </p>
-        <button onClick={()=> this.calculateTotalClickHandler}>Total</button>
-        {
-          this.state.toggleView?
-          <div>
-            <Order click={this.calculateTotalClickHandler.bind(this,"test1")}
-              changed={this.orderChangedHandler}
-              food={this.state.order[0].food} quantity={this.state.order[0].quantity}
-              size={this.state.order[0].size}/>
-            <Order food={this.state.order[1].food} quantity={this.state.order[1].quantity} size={this.state.order[1].size}> The cost is {this.state.bill} Aud.</Order>
-          </div>:null
-        }
+        <button onClick={this.calculateTotalClickHandler}>Total</button>
+        {burger}
       </div>
     );
   }
